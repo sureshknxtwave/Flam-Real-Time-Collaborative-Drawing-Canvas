@@ -7,15 +7,21 @@
 
 The system uses a centralized real-time state model where all drawing operations are treated as immutable events and synchronized via WebSockets. The server acts as the single source of truth for stroke history, while clients render incrementally for performance.
 
-## 🔄 Data Flow Diagram
-
-
-
-1. **User Input:** Local mouse or touch events are captured.
-2. **Coordinate Normalization:** Positions are calculated relative to the canvas element to account for responsive headers.
-3. **WebSocket Emit:** `draw-start` or `draw-point` is sent to the Node.js server.
-4. **Broadcast:** The server updates the `strokes[]` array and broadcasts the event to all other clients in the room.
-5. **Incremental Rendering:** Remote clients receive data and draw only the new line segment to maintain high FPS.
+## 🔄 Data Flow Diagram (Textual)
+User Input (Mouse Events)
+        ↓
+CanvasBoard (Client)
+        ↓
+WebSocket Emit (draw-start / draw-point)
+        ↓
+Socket Server
+        ↓
+Room Drawing State
+        ↓
+Broadcast to All Clients
+        ↓
+Canvas Rendering (Incremental)
+Undo/Redo follows the same flow, except the server emits a full canvas reset.
 
 ## 🔌 WebSocket Protocol
 
