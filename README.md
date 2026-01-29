@@ -12,8 +12,7 @@ A multi-user real-time drawing application where multiple users can draw simulta
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd collaborative-canvas
+git clone https://github.com/sureshknxtwave/Flam-Real-Time-Collaborative-Drawing-Canvas
 
 # Install dependencies
 npm install
