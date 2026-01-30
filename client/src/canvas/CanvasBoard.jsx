@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/immutability */
 import { useEffect, useRef, useState } from "react";
 import { socket } from "../socket/socket";
+import "../App.css";
 
 const ROOM_ID = "default-room";
 
@@ -7,13 +9,14 @@ export default function CanvasBoard() {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
  
+  // eslint-disable-next-line react-hooks/purity
   const fpsRef = useRef({ last: performance.now(), frames: 0 });
   const drawing = useRef(false);
   const lastCursorEmit = useRef(0);
 
   const [fps, setFps] = useState(0);
   const [latency, setLatency] = useState(0);
-  const [strokes, setStrokes] = useState([]);
+  const [, setStrokes] = useState([]);
   const [users, setUsers] = useState({});
   const [darkMode, setDarkMode] = useState(false);
 
@@ -35,6 +38,7 @@ export default function CanvasBoard() {
 
     const redraw = (allStrokes) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // eslint-disable-next-line react-hooks/immutability
       allStrokes.forEach(drawFullStroke);
     };
 
@@ -247,145 +251,129 @@ export default function CanvasBoard() {
 
   /* ======================= RENDER ======================= */
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        background: darkMode ? "#1e1e1e" : "#f5f5f5",
-        color: darkMode ? "#fff" : "#000",
-        overflow: "hidden"
-      }}
-    >
+    
 
-      {/* Navigation Bar */}
-     
-      {/* Toolbar */}
-      <div
-        style={{
-          position: "fixed",
-          top: 12,
-          left: 12,
-          zIndex: 20,
-          background: darkMode ? "#333" : "#ffffff",
-          padding: "10px 12px",
-          borderRadius: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-          border: "1px solid #eee",
-        }}
-      >
+/**
+ * Main Whiteboard Component Wrapper
+ * Dynamically switches between 'dark' and 'light' classes based on state.
+ */
+<div className={`app-container ${darkMode ? "dark" : "light"}`}>
+  
+  {/* --- 1. SIDEBAR TOOLBAR --- */}
+  <div className={`toolbar ${darkMode ? "dark" : "light"}`}>
+    
+    {/* Brush Customization: Color and Thickness */}
+    <div className="control-group">
+      <input
+        type="color"
+        className="color-picker"
+        value={color}
+        onChange={(e) => setColor(e.target.value)}
+        disabled={tool === "eraser"} // Disable color selection when erasing
+      />
+      <div className="range-container">
         <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          disabled={tool === "eraser"}
-          style={{ width: 32, height: 32, padding: 0, border: "none" }}
+          type="range"
+          min="1"
+          max="40"
+          value={width}
+          onChange={(e) => setWidth(Number(e.target.value))}
         />
-
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <input
-            type="range"
-            min="1"
-            max="40"
-            value={width}
-            onChange={(e) => setWidth(Number(e.target.value))}
-          />
-          <span style={{ fontSize: 12, minWidth: "30px" }}>{width}px</span>
-        </div>
-
-        <div style={{ display: "flex", gap: 5, borderRight: "1px solid #ddd", paddingRight: 10 }}>
-          <button onClick={() => setTool("brush")} style={{ padding: "6px 10px", borderRadius: 6, background: tool === "brush" ? "#007bff" : "#eee", color: tool === "brush" ? "#fff" : "#000", border: "none", cursor: "pointer" }}>Brush</button>
-          <button onClick={() => setTool("eraser")} style={{ padding: "6px 10px", borderRadius: 6, background: tool === "eraser" ? "#007bff" : "#eee", color: tool === "eraser" ? "#fff" : "#000", border: "none", cursor: "pointer" }}>Eraser</button>
-        </div>
-
-        <div style={{ display: "flex", gap: 5 }}>
-          <button onClick={handleUndo} style={{ padding: "6px 10px", borderRadius: 6, background: "#eee", color: "#000", border: "none", cursor: "pointer" }} title="Undo (Ctrl+Z)">⟲ Undo</button>
-          <button onClick={handleRedo} style={{ padding: "6px 10px", borderRadius: 6, background: "#eee", color: "#000", border: "none", cursor: "pointer" }} title="Redo (Ctrl+Y)">⟳ Redo</button>
-          {/* CLEAR BUTTON ADDED HERE */}
-          <button onClick={handleClear} style={{ padding: "6px 10px", borderRadius: 6, background: "#ff4d4d", color: "#fff", border: "none", cursor: "pointer" }} title="Clear Board">🗑 Clear</button>
-        </div>
-
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          style={{ padding: "6px 10px", borderRadius: 6, background: darkMode ? "#555" : "#ddd", color: darkMode ? "#fff" : "#000", border: "none", cursor: "pointer", marginLeft: 10 }}
-        >
-          {darkMode ? "☀️ Light" : "🌙 Dark"}
-        </button>
-      </div>
-
-      {/* Online Users Panel */}
-      <div
-        style={{
-          position: "fixed",
-          top: 12,
-          right: 12,
-          zIndex: 20,
-          background: darkMode ? "#333" : "#ffffff",
-          padding: "10px",
-          borderRadius: 10,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-          fontSize: "12px",
-          minWidth: "140px",
-          border: "1px solid #eee"
-        }}
-      >
-        <strong>Online Users ({Object.keys(users).length})</strong>
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 8 }}>
-          {Object.entries(users).map(([id, user]) => (
-            <li key={id} style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: user.color || "#ccc",
-                  marginRight: 8
-                }}
-              />
-              <span style={{ opacity: id === socket.id ? 0.6 : 1 }}>
-                {id === socket.id ? "You" : `User ${id.slice(0, 4)}`}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Canvas Area */}
-      <div style={{ position: "relative", width: "100%", height: "100%" }}>
-        <canvas
-          ref={canvasRef}
-          onMouseDown={startDraw}
-          onMouseMove={draw}
-          onMouseUp={stopDraw}
-          onMouseLeave={stopDraw}
-        />
-
-        {Object.entries(users).map(([id, user]) => (
-          id !== socket.id && (
-            <div
-              key={id}
-              style={{
-                position: "absolute",
-                left: user.x,
-                top: user.y,
-                pointerEvents: "none",
-                transform: "translate(-50%, -50%)",
-                color: user.color || "#ff0000",
-                fontSize: 16,
-              }}
-            >
-              ▲
-            </div>
-          )
-        ))}
-      </div>
-
-      {/* Performance Stats */}
-      <div style={{ position: "fixed", bottom: 12, right: 12, background: "rgba(0,0,0,0.6)", color: "#fff", padding: "4px 10px", borderRadius: 20, fontSize: 10 }}>
-        FPS: {fps} | Latency: {latency}ms
+        <span style={{ fontSize: 12 }}>{width}px</span>
       </div>
     </div>
+
+    <hr className="divider" />
+
+    {/* Tool Selection: Switch between Brush and Eraser */}
+    <div className="button-group">
+      <button 
+        onClick={() => setTool("brush")} 
+        className={`btn ${tool === "brush" ? "btn-primary" : "btn-secondary"}`}
+      >
+        Brush
+      </button>
+      <button 
+        onClick={() => setTool("eraser")} 
+        className={`btn ${tool === "eraser" ? "btn-primary" : "btn-secondary"}`}
+      >
+        Eraser
+      </button>
+    </div>
+
+    <hr className="divider" />
+
+    {/* History & Actions: Undo, Redo, and Clear Canvas */}
+    <div className="button-group">
+      <button onClick={handleUndo} className="btn btn-secondary">⟲ Undo</button>
+      <button onClick={handleRedo} className="btn btn-secondary">⟳ Redo</button>
+      <button onClick={handleClear} className="btn btn-danger">🗑 Clear</button>
+    </div>
+
+    {/* Theme Switcher: Toggles global darkMode state */}
+    <button
+      onClick={() => setDarkMode(!darkMode)}
+      className="btn btn-secondary"
+      style={{ background: darkMode ? "#555" : "#ddd", color: darkMode ? "#fff" : "#000" }}
+    >
+      {darkMode ? "☀️ Light" : "🌙 Dark"}
+    </button>
+  </div>
+
+  {/* --- 2. COLLABORATION PANEL --- */}
+  {/* Shows list of connected users and their assigned stroke colors */}
+  <div className={`online-users-panel ${darkMode ? "dark" : "light"}`}>
+    <strong>Online Users ({Object.keys(users).length})</strong>
+    <ul className="user-list">
+      {Object.entries(users).map(([id, user]) => (
+        <li key={id} className="user-item">
+          {/* Status dot colored by the user's specific pen color */}
+          <span className="status-dot" style={{ background: user.color || "#ccc" }} />
+          <span style={{ opacity: id === socket.id ? 0.6 : 1 }}>
+            {id === socket.id ? "You" : `User ${id.slice(0, 4)}`}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  {/* --- 3. DRAWING SURFACE --- */}
+  <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    {/* Main HTML5 Canvas Element */}
+    <canvas 
+      ref={canvasRef} 
+      onMouseDown={startDraw} 
+      onMouseMove={draw} 
+      onMouseUp={stopDraw} 
+      onMouseLeave={stopDraw} 
+    />
+
+    {/* --- 4. REMOTE CURSORS --- */}
+    {/* Renders visual pointers for other users in real-time */}
+    {Object.entries(users).map(([id, user]) => (
+      id !== socket.id && (
+        <div 
+          key={id} 
+          style={{ 
+            position: "absolute", 
+            left: user.x, 
+            top: user.y, 
+            pointerEvents: "none", // Prevent cursors from blocking mouse clicks on canvas
+            transform: "translate(-50%, -50%)", 
+            color: user.color || "#ff0000", 
+            fontSize: 16 
+          }}
+        >
+          ▲
+        </div>
+      )
+    ))}
+  </div>
+
+  {/* --- 5. PERFORMANCE OVERLAY --- */}
+  <div className="stats-bar">
+    FPS: {fps} | Latency: {latency}ms
+  </div>
+</div>
   );
 }

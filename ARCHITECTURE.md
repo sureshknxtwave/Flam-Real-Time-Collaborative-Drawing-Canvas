@@ -24,7 +24,6 @@ Canvas Rendering (Incremental)
 Undo/Redo follows the same flow, except the server emits a full canvas reset.
 
 ## 🔌 WebSocket Protocol
-
 ### Client → Server
 | Event | Payload |
 | :--- | :--- |

@@ -1,0 +1,259 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+canvas {
+  display: block;
+  
+  cursor: crosshair;
+}
+
+
+/* ==========================================
+   1. GLOBAL VARIABLES & THEMES
+   ========================================== */
+:root {
+  --primary-blue: #007bff;
+  --danger-red: #ff4d4d;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --border-light: #eee;
+  --border-dark: #444;
+}
+
+/* Light Theme Variables */
+.light {
+  --bg-app: #f5f5f5;
+  --bg-panel: #ffffff;
+  --text-main: #000000;
+  --bg-btn-sec: #eeeeee;
+  --text-btn-sec: #000000;
+}
+
+/* Dark Theme Variables */
+.dark {
+  --bg-app: #1e1e1e;
+  --bg-panel: #333333;
+  --text-main: #ffffff;
+  --bg-btn-sec: #555555;
+  --text-btn-sec: #ffffff;
+}
+
+/* ==========================================
+   2. CORE LAYOUT
+   ========================================== */
+.app-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  transition: background-color 0.3s ease;
+}
+
+.canvas-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================
+   3. TOOLBAR (SIDEBAR)
+   ========================================== */
+.toolbar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  padding: 16px 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 15px;
+  background-color: var(--bg-panel);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  width: fit-content;
+}
+
+/* Control containers within the toolbar */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ==========================================
+   4. UI COMPONENTS (Buttons, Inputs, Panels)
+   ========================================== */
+.btn {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: filter 0.2s;
+}
+
+.btn:hover {
+  filter: brightness(1.1);
+}
+
+.btn-primary { background-color: var(--primary-blue); color: #fff; }
+.btn-secondary { background-color: var(--bg-btn-sec); color: var(--text-btn-sec); }
+.btn-danger { background-color: var(--danger-red); color: #fff; }
+
+.color-picker {
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0;
+}
+
+/* ==========================================
+   5. OVERLAY PANELS
+   ========================================== */
+.online-users-panel {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: var(--bg-panel);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  min-width: 140px;
+  border: 1px solid var(--border-light);
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.stats-bar {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+}
+
+/* ==========================================
+   6. REMOTE CURSORS
+   ========================================== */
+.remote-cursor {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+}
+
+
+
+
+/* ==========================================
+   7. RESPONSIVENESS (The Mobile Fix)
+   ========================================== */
+
+@media (max-width: 768px) {
+  /* Fix the Toolbar at the bottom */
+  .toolbar {
+    top: auto;            /* Remove the top constraint */
+    bottom: 12px;         /* Stick to bottom */
+    left: 50%;            /* Center alignment */
+    transform: translateX(-50%); /* Perfect centering */
+    flex-direction: row;  /* Keep horizontal flow */
+    width: 90%;           /* Occupy most of the width */
+    max-width: 500px;
+    flex-wrap: nowrap;    /* Allow internal items to stay on one line... */
+    overflow-x: auto;     /* ...but make them scrollable if they don't fit */
+    padding: 8px 12px;
+    gap: 12px;
+    justify-content: flex-start; /* Better for scrolling */
+    align-items: center;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+
+  /* Prevent toolbar items from shrinking too much */
+  .control-group, .button-group {
+    flex-direction: row;
+    flex-shrink: 0;      /* Crucial: prevents buttons from crushing */
+    gap: 8px;
+  }
+
+  /* Make the slider smaller for mobile */
+  input[type="range"] {
+    width: 60px;
+  }
+
+  /* Hide labels or text to save precious space */
+  .btn {
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  /* Adjust the Online Users Panel so it's less intrusive */
+  .online-users-panel {
+    top: 10px;
+    right: 10px;
+    min-width: 110px;
+    padding: 6px 10px;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent */
+  }
+
+  /* Move FPS/Latency bar up so it doesn't hide behind the toolbar */
+  .stats-bar {
+    bottom: 70px; 
+    right: 10px;
+    opacity: 0.7;
+  }
+}
+
+/* Extra small devices (iPhone SE, etc.) */
+@media (max-width: 380px) {
+  .toolbar {
+    gap: 8px;
+  }
+  .range-container span {
+    display: none; /* Hide '3px' text to save space */
+  }
+}
